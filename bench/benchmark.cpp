@@ -4,29 +4,19 @@
 #include <algorithm>
 #include <iomanip>
 #include "../src/solution.hpp"
+#include "../src/utils.hpp"
 
 using namespace std;
 using namespace chrono;
 
-int encontrarMinSort(vector<int> arr) {
-    sort(arr.begin(), arr.end());
-    return arr[0];
+template<typename Func>
+double medir(Func f, int repeticiones) {
+    auto t1 = high_resolution_clock::now();
+    volatile int r;
+    for (int i = 0; i < repeticiones; i++) { r = f(); }
+    auto t2 = high_resolution_clock::now();
+    return duration<double, milli>(t2 - t1).count() / repeticiones;
 }
-
-vector<int> generarRotado(int n, int rotacion) {
-    vector<int> arr(n);
-    for (int i = 0; i < n; i++)
-        arr[i] = (rotacion + i) % n;
-    return arr;
-}
-
-#define MEDIR(codigo, repeticiones) [&]() { \
-    auto t1 = high_resolution_clock::now(); \
-    volatile int r; \
-    for (int i = 0; i < repeticiones; i++) { r = codigo; } \
-    auto t2 = high_resolution_clock::now(); \
-    return duration<double, milli>(t2 - t1).count() / repeticiones; \
-}()
 
 int main() {
     vector<int> tamanios = {1000, 10000, 100000, 1000000};
@@ -42,9 +32,9 @@ int main() {
     for (int n : tamanios) {
         vector<int> arr = generarRotado(n, n / 3);
 
-        double msLineal  = MEDIR(encontrarMin(arr.data(), n), REP);
-        double msSort    = MEDIR(encontrarMinSort(arr), REP);
-        double msBinaria = MEDIR(encontrarMin(arr.data(), n), REP);
+        double msLineal  = medir([&]() { return encontrarMinIngenua(arr.data(), n); }, REP);
+        double msSort    = medir([&]() { return encontrarMinSort(arr); }, REP);
+        double msBinaria = medir([&]() { return encontrarMin(arr.data(), n); }, REP);
 
         cout << setw(12) << n
              << setw(18) << msLineal

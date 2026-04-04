@@ -1,80 +1,32 @@
 #include <cassert>
 #include <iostream>
+#include <string>
 #include "../src/solution.hpp"
 
 using namespace std;
 
-void test_caso_normal() {
-    // Arrange
-    int arr[] = {3, 4, 5, 1, 2};
-    int n = 5;
-
-    // Act
+void ejecutar_test(int arr[], int n, int esperado, const string& nombre) {
     int resultado = encontrarMin(arr, n);
-
-    // Assert
-    assert(arr[resultado] == 1);
-    cout << "Caso normal pasó" << endl;
-}
-
-void test_pequenio() {
-    // Arrange
-    int arr[] = {2, 1};
-    int n = 2;
-
-    // Act
-    int resultado = encontrarMin(arr, n);
-
-    // Assert
-    assert(arr[resultado] == 1);
-    cout << "Caso pequeño pasó" << endl;
-}
-
-void caso_borde_1() {
-    // Arrange
-    int arr[] = {1};
-    int n = 1;
-
-    // Act
-    int resultado = encontrarMin(arr, n);
-
-    // Assert
-    assert(arr[resultado] == 1);
-    cout << "Caso borde 1 pasó" << endl;
-}
-
-void caso_borde_2() {
-    // Arrange
-    int arr[] = {1, 2, 3, 4, 5};
-    int n = 5;
-
-    // Act
-    int resultado = encontrarMin(arr, n);
-
-    // Assert
-    assert(arr[resultado] == 1);
-    cout << "Caso borde 2 pasó" << endl;
-}
-
-void caso_propuesto() {
-    // Arrange
-    int arr[] = {22, 23, 24, 25, 20, 21};
-    int n = sizeof(arr) / sizeof(arr[0]);
-
-    // Act
-    int resultado = encontrarMin(arr, n);
-
-    // Assert
-    assert(arr[resultado] == 20);
-    cout << "Caso propuesto pasó" << endl;
+    assert(arr[resultado] == esperado);
+    cout << nombre << " pasó" << endl;
 }
 
 int main() {
-    test_caso_normal();
-    test_pequenio();
-    caso_borde_1();
-    caso_borde_2();
-    caso_propuesto();
+    int arr1[] = {3, 4, 5, 1, 2};
+    ejecutar_test(arr1, 5, 1, "Caso normal");
+
+    int arr2[] = {2, 1};
+    ejecutar_test(arr2, 2, 1, "Caso pequeño");
+
+    int arr3[] = {1};
+    ejecutar_test(arr3, 1, 1, "Caso borde 1");
+
+    int arr4[] = {1, 2, 3, 4, 5};
+    ejecutar_test(arr4, 5, 1, "Caso borde 2");
+
+    int arr5[] = {22, 23, 24, 25, 20, 21};
+    ejecutar_test(arr5, 6, 20, "Caso propuesto");
+
     cout << "Todos los test pasaron" << endl;
     return 0;
 }
