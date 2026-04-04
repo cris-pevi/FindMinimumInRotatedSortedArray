@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/exucutable_test.dir/test/test.cpp.o CMakeFiles/exucutable_test.dir/src/solution.cpp.o -o exucutable_test 
