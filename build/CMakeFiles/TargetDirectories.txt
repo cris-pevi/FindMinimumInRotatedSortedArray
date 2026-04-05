@@ -1,6 +1,0 @@
-/mnt/c/Users/LAPTOP_HP/Desktop/26-Q1/AED-26/FindMinimumInRotatedSortedArray/build/CMakeFiles/programa.dir
-/mnt/c/Users/LAPTOP_HP/Desktop/26-Q1/AED-26/FindMinimumInRotatedSortedArray/build/CMakeFiles/executable_test.dir
-/mnt/c/Users/LAPTOP_HP/Desktop/26-Q1/AED-26/FindMinimumInRotatedSortedArray/build/CMakeFiles/benchmark.dir
-/mnt/c/Users/LAPTOP_HP/Desktop/26-Q1/AED-26/FindMinimumInRotatedSortedArray/build/CMakeFiles/test.dir
-/mnt/c/Users/LAPTOP_HP/Desktop/26-Q1/AED-26/FindMinimumInRotatedSortedArray/build/CMakeFiles/edit_cache.dir
-/mnt/c/Users/LAPTOP_HP/Desktop/26-Q1/AED-26/FindMinimumInRotatedSortedArray/build/CMakeFiles/rebuild_cache.dir

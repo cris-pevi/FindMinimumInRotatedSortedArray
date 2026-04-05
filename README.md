@@ -328,10 +328,90 @@ Tamaño      Lineal O(n)       Sort O(nlogn)         Binaria O(logn)
 ./build/prog_san
 ```
 
-Si no aparece ningún mensaje de error de AddressSanitizer o UndefinedBehaviorSanitizer, la ejecución es limpia.
+## Benchmark realizado
+ 
+Se implementó un benchmark en `bench/benchmark.cpp` que compara las tres soluciones (búsqueda lineal, `std::sort` y búsqueda binaria) para tamaños de entrada de 1,000 a 1,000,000 elementos. Cada medición promedia 100 repeticiones usando `std::chrono::high_resolution_clock`. Se usa una variable `volatile` para evitar que el compilador elimine la llamada al algoritmo por optimización. Los arreglos de prueba se generan con `generarRotado(n, n/3)`, que crea un arreglo rotado de tamaño n.
+ 
+---
+ 
+## Tabla resumida de builds y resultados
+ 
+Se compiló el benchmark con seis configuraciones distintas de `g++ -std=c++17`. Los tiempos corresponden al promedio de 3 corridas para n = 1,000,000.
+ 
+| Build | Flags | Lineal (ms) | Sort (ms) | Binaria (ms) | Tamaño ejecutable |
+|-------|-------|------------|-----------|-------------|-------------------|
+| Debug | `-O0 -g -Wall -Wextra -Wpedantic` | 2.005 | 212.92 | 0.0001 | 187 KB |
+| Depurable optimizado | `-Og -g -Wall -Wextra -Wpedantic` | 0.564 | 10.49 | 0.0000 | 191 KB |
+| Optimización básica | `-O1` | 2.125 | 9.17 | 0.0000 | 18 KB |
+| Release | `-O2 -DNDEBUG` | 2.093 | 9.44 | 0.0000 | 18 KB |
+| Optimización agresiva | `-O3` | 0.649 | 8.86 | 0.0001 | 18 KB |
+| Compacto | `-Os` | 2.167 | 11.34 | 0.0001 | 18 KB |
+ 
+El cambio más notable es el de `-O0` a cualquier nivel de optimización en `std::sort`: pasa de ~213 ms a ~9 ms (~24× más rápido). Los builds con `-g` (símbolos de depuración) son ~170 KB más grandes que los optimizados sin él.
+ 
+---
+ 
+## Observaciones de sanitizers
+ 
+Se compiló y ejecutó la solución con AddressSanitizer y UndefinedBehaviorSanitizer:
+ 
+```bash
+g++ -std=c++17 -O1 -g -fsanitize=address,undefined src/main.cpp src/solution.cpp src/utils.cpp -o build/prog_san
+./build/prog_san
+```
+ 
+**Resultado:** ejecución limpia, sin errores detectados. ASan no reportó accesos fuera de límites, uso de memoria liberada ni leaks. UBSan no reportó desbordamientos de enteros, divisiones por cero ni comportamiento indefinido.
+ 
+En un programa mal escrito, esta configuración habría detectado errores como: acceso fuera de los límites del arreglo (buffer overflow), uso de variables no inicializadas, desbordamiento de enteros con signo y acceso a memoria ya liberada (use-after-free).
+ 
+---
+ 
+## Resumen de cobertura
+ 
+Se midió la cobertura con `gcov` compilando con `--coverage -O0`.
+ 
+| Archivo | Líneas ejecutables | Líneas cubiertas | Cobertura |
+|---------|-------------------|-----------------|-----------|
+| `solution.cpp` | 14 | 8 | 57.14% |
+| `utils.cpp` | 8 | 0 | 0.00% |
+ 
+La función principal `encontrarMin` tiene **100% de cobertura de líneas y 100% de cobertura de condiciones**: ambas ramas del `if (arr[medio] > arr[high])` fueron ejercitadas (4 veces true, 5 veces false) y el `while` se ejecutó tanto en su rama verdadera (9 iteraciones) como falsa (5 salidas). Las funciones no cubiertas (`encontrarMinIngenua`, `generarRotado`, `encontrarMinSort`) son utilitarias del benchmark y no forman parte de la solución entregada.
+ 
+---
+ 
+## Resumen de profiling
+ 
+Se perfiló el benchmark con `gprof` compilando con `-O2 -pg`.
+ 
+| Función | % del tiempo | Segundos | Llamadas |
+|---------|-------------|----------|----------|
+| `encontrarMinIngenua` | 89.57% | 1.03 s | 1,200 |
+| `encontrarMinSort` | 10.43% | 0.12 s | 400 |
+| `encontrarMin` | 0.00% | 0.00 s | 400 |
+| `generarRotado` | 0.00% | 0.00 s | 4 |
+ 
+El resultado coincide con el análisis teórico: la búsqueda lineal O(n) domina el tiempo de ejecución, el sort O(n log n) es significativo, y la búsqueda binaria O(log n) es tan rápida que gprof no puede medir su contribución. Al perfilar el programa principal (que solo usa `encontrarMin` con un arreglo de 6 elementos), gprof reportó "no time accumulated", confirmando la eficiencia de O(log n).
+ 
+---
+ 
+## Microoptimización vs algoritmo
+ 
+Para n = 1,000,000, comparando las dos estrategias de mejora:
+ 
+| Estrategia | Cambio | Speedup | Complejidad |
+|-----------|--------|---------|-------------|
+| Mejor bandera de compilación | Lineal `-O0` → Lineal `-O3` | ~3.1× | Sigue en O(n) |
+| Mejor algoritmo | Lineal `-O0` → Binaria `-O0` | ~20,000× | O(n) → O(log n) |
+ 
+La elección del algoritmo correcto (búsqueda binaria vs lineal) tiene un impacto de **cuatro órdenes de magnitud** más que la mejor optimización del compilador. Cambiar de `-O0` a `-O3` mejora ~3×; cambiar de búsqueda lineal a búsqueda binaria mejora ~20,000×. Esta diferencia solo se amplifica conforme n crece.
+ 
+---
+ 
+
+ 
 Grupo 10
 Angel Jesus Navarro Ruiz
 Cristhyan Perez Villegas
-
+ 
 
 
