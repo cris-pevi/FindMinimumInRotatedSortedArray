@@ -1,10 +1,177 @@
-# Complejidad Temporal
+# Grupo 10
+
+Integrantes:
+- Cristhyan Manuel Perez Villegas
+- Angel Navarro Ruiz
+
+# Find Minimum in Rotated Sorted Array
+
+> **Problema:** LeetCode 153 — [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/)
+
+Suppose an array of length n sorted in ascending order is rotated between 1 and n times. For example, 
+the array nums = [0,1,2,4,5,6,7] might become:
+
+- [4,5,6,7,0,1,2] if it was rotated 4 times.
+- [0,1,2,4,5,6,7] if it was rotated 7 times.
+
+Notice that rotating an array [a[0], a[1], a[2], ..., a[n-1]] 1 time results in the array [a[n-1], a[0], a[1], a[2], ..., a[n-2]].
+Given the sorted rotated array nums of unique elements, return the minimum element of this array.
+You must write an algorithm that runs in O(log n) time.
+
+Example 1:
+
+Input: nums = [3,4,5,1,2]
+Output: 1
+Explanation: The original array was [1,2,3,4,5] rotated 3 times.
+Example 2:
+
+Input: nums = [4,5,6,7,0,1,2]
+Output: 0
+Explanation: The original array was [0,1,2,4,5,6,7] and it was rotated 4 times.
+Example 3:
+
+Constraints:
+
+n == nums.length
+1 <= n <= 5000
+-5000 <= nums[i] <= 5000
+All the integers of nums are unique.
+nums is sorted and rotated between 1 and n times.
+
+## Entrada y salida
+
+Entrada: Un arreglo de enteros arr de tamaño n, originalmente ordenado de forma estrictamente ascendente y rotado un número desconocido de posiciones. Por ejemplo: [3, 4, 5, 1, 2].
+
+Salida: El valor mínimo del arreglo (o su índice, según la implementación).
 
 ## Tamaño de entrada relevante
 
-Para las tres funciones, el tamaño de entrada relevante es **n**, donde n es el número de elementos del arreglo. Todas las funciones reciben un arreglo de n enteros y devuelven el mínimo.
+El parámetro relevante es n, la cantidad de elementos del arreglo. A medida que n crece, el costo de encontrar el mínimo depende directamente del enfoque utilizado. Para entradas pequeñas cualquier estrategia es viable, pero conforme n escala, la diferencia entre un recorrido completo y una búsqueda que descarta porciones del arreglo se vuelve significativa.
+
+## Descripción de la solución
+
+El problema admite varios enfoques. El más directo consiste en recorrer todos los elementos y llevar registro del menor encontrado. Sin embargo, dado que el arreglo tiene una estructura particular —es un arreglo ordenado con un punto de quiebre— es posible aprovechar esa propiedad para reducir el espacio de búsqueda en cada paso y encontrar el mínimo sin necesidad de examinar todos los elementos. También existe la alternativa de reordenar el arreglo con herramientas estándar y acceder directamente al primer elemento.
+
+# Soluciones
+
+Se implementaron y compararon tres soluciones para encontrar el mínimo en un arreglo rotado:
+
+### Solución 1 — Búsqueda binaria `encontrarMin` — O(log n) Solución principal
+
+Aprovecha la propiedad estructural del arreglo rotado: en cada paso compara `arr[medio]` con `arr[high]` para determinar en cuál mitad se encuentra el punto de quiebre y descarta la otra mitad. Cada iteración reduce el rango a la mitad.
+
+```cpp
+int encontrarMin(int arr[], int n) {
+    int low = 0, high = n - 1;
+    while (low < high) {
+        int medio = (low + high) / 2;
+        if (arr[medio] > arr[high])
+            low = medio + 1;
+        else
+            high = medio;
+    }
+    return low;
+}
+```
+
+### Solución 2 — Búsqueda lineal `encontrarMinIngenua` — O(n)
+
+Recorre el arreglo completo de izquierda a derecha, comparando cada elemento con el mínimo encontrado hasta ese momento. No aprovecha ninguna propiedad estructural del arreglo rotado.
+
+```cpp
+int encontrarMinIngenua(int arr[], int n) {
+    int minIndex = 0;
+    for (int i = 1; i < n; i++) {
+        if (arr[i] < arr[minIndex])
+            minIndex = i;
+    }
+    return minIndex;
+}
+```
+
+Es la solución más intuitiva pero también la más costosa: siempre realiza n − 1 comparaciones independientemente de la entrada.
+
+### Solución 3 — STL sort `encontrarMinSort` — O(n log n)
+
+Ordena el arreglo completo con `std::sort` y devuelve el primer elemento. Es la solución más ineficiente de las tres porque paga el costo completo de un ordenamiento cuando el problema solo requiere encontrar un elemento.
+
+```cpp
+int encontrarMinSort(vector<int> arr) {
+    sort(arr.begin(), arr.end());
+    return arr[0];
+}
+```
+
+Esta solución ilustra el principio central de la práctica: una mejora en la elección del algoritmo tiene más impacto que cualquier microoptimización. El sort hace trabajo completamente innecesario.
+
+
+
+# Análisis de Soluciones
+
+### 1. Solución Óptima — Búsqueda Binaria
+
+**Justificación de determinismo y factibilidad**  
+Dado un arreglo de enteros con rotación, el algoritmo siempre produce el mismo índice del mínimo para la misma entrada. No existe aleatoriedad ni decisiones ambiguas: cada comparación depende únicamente de los valores del arreglo, por lo que el resultado es completamente predecible y reproducible.
+
+**Argumento de finitud**  
+En cada iteración el espacio de búsqueda `[low, high]` se reduce estrictamente: si se toma la rama `low = medio + 1` el intervalo se achica por la izquierda; si se toma `high = medio` se achica por la derecha. Como `medio` siempre es estrictamente menor que `high` (división entera con `low < high`), el intervalo nunca permanece igual. Al ser finito y decrecer en cada paso, el ciclo termina en a lo sumo `⌈log₂(n)⌉` iteraciones.
+
+**Argumento de correctitud**  
+El algoritmo mantiene la propiedad de que el índice del mínimo siempre se encuentra dentro de `[low, high]`. Al terminar, `low == high`, por lo que ese único índice es necesariamente el mínimo global.
+
+**Invariante**  
+> Al inicio de cada iteración, el índice del mínimo global se encuentra en `arr[low..high]`.
+
+- *Base:* con `low = 0` y `high = n - 1`, el intervalo contiene todo el arreglo.  
+- *Paso:* si `arr[medio] > arr[high]`, el mínimo no puede estar en `[low, medio]` pues ese segmento es creciente y mayor que `arr[high]`, así que se actualiza `low = medio + 1`. En caso contrario, el mínimo está en `[low, medio]` y se actualiza `high = medio`. La invariante se preserva en ambos casos.
+
+**Monotonicidad**  
+La cantidad `high - low` es estrictamente decreciente en cada iteración, actuando como función de ranking que converge a 0 y garantiza la terminación.
 
 ---
+
+### 2. Solución Ingenua — Recorrido Lineal
+
+**Justificación de determinismo y factibilidad**  
+El algoritmo recorre el arreglo de izquierda a derecha de forma secuencial. Para cualquier entrada fija siempre retorna el mismo índice, sin depender de factores externos ni decisiones no deterministas.
+
+**Argumento de finitud**  
+El índice `i` se incrementa en 1 en cada iteración, comenzando en 1 y terminando en `n - 1`. El bucle ejecuta exactamente `n - 1` iteraciones, por lo que termina en tiempo finito y estrictamente acotado por el tamaño de la entrada.
+
+**Argumento de correctitud**  
+`minIndex` siempre guarda el índice del menor elemento visto hasta la iteración `i`. Al finalizar el recorrido completo, todos los elementos han sido comparados, por lo que `minIndex` contiene el índice del mínimo global.
+
+**Invariante**  
+> Al inicio de la iteración `i`, `minIndex` es el índice del mínimo en `arr[0..i-1]`.
+
+- *Base:* con `i = 1`, `minIndex = 0`, que es trivialmente el mínimo de `arr[0..0]`.  
+- *Paso:* si `arr[i] < arr[minIndex]` se actualiza `minIndex = i`; en caso contrario se conserva. En ambos casos la invariante se mantiene para `arr[0..i]`.
+
+**Monotonicidad**  
+No aplica en el sentido de partición del espacio de búsqueda. La función de progreso es el contador `i`, que crece de forma lineal y acotada hasta `n - 1`.
+
+---
+
+### 3. Solución STL — `sort` + acceso directo
+
+**Justificación de determinismo y factibilidad**  
+`std::sort` es un algoritmo determinista. Para la misma entrada siempre produce el mismo arreglo ordenado, y el mínimo queda ubicado en la posición 0, accesible directamente.
+
+**Argumento de finitud**  
+`std::sort` tiene complejidad garantizada de `O(n log n)` en el peor caso. Al ser un algoritmo estándar con terminación formalmente probada, la función concluye en un número finito de operaciones proporcional a `n log n`.
+
+**Argumento de correctitud**  
+Por definición de ordenamiento ascendente, al aplicar `std::sort` el elemento en la posición 0 es el mínimo global del arreglo. El acceso `arr[0]` retorna ese valor de forma directa y correcta.
+
+**Invariante**  
+No aplica a nivel de uso externo del STL. Las invariantes de partición son internas al algoritmo subyacente (introsort) y quedan encapsuladas en la librería estándar.
+
+**Monotonicidad**  
+No aplica a nivel de esta solución. La monotonicidad es interna al algoritmo de ordenamiento subyacente.
+
+
+
+# Complejidad Temporal
 
 ## 1. Búsqueda binaria — `encontrarMin` → O(log n)
 
@@ -111,63 +278,10 @@ $$O(1) \subset O(\log n) \subset O(n) \subset O(n \log n) \subset O(n^2) \subset
 La búsqueda binaria se ubica en **O(log n)**, el segundo nivel más eficiente posible. La búsqueda lineal en **O(n)** y la solución con sort en **O(n log n)**. La diferencia se vuelve dramática conforme n crece: para n = 1,000,000, log₂(n) ≈ 20 operaciones versus 1,000,000 operaciones de la búsqueda lineal.
 
 
-# Find Minimum in Rotated Sorted Array
-
-> **Problema:** LeetCode 153 — [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/)
 
 ---
 
-## Alternativa ingenua o menos eficiente
 
-Se implementaron y compararon tres soluciones para encontrar el mínimo en un arreglo rotado:
-
-### Solución 1 — Búsqueda lineal `encontrarMinIngenua` — O(n)
-
-Recorre el arreglo completo de izquierda a derecha, comparando cada elemento con el mínimo encontrado hasta ese momento. No aprovecha ninguna propiedad estructural del arreglo rotado.
-
-```cpp
-int encontrarMinIngenua(int arr[], int n) {
-    int minIndex = 0;
-    for (int i = 1; i < n; i++) {
-        if (arr[i] < arr[minIndex])
-            minIndex = i;
-    }
-    return minIndex;
-}
-```
-
-Es la solución más intuitiva pero también la más costosa: siempre realiza n − 1 comparaciones independientemente de la entrada.
-
-### Solución 2 — STL sort `encontrarMinSort` — O(n log n)
-
-Ordena el arreglo completo con `std::sort` y devuelve el primer elemento. Es la solución más ineficiente de las tres porque paga el costo completo de un ordenamiento cuando el problema solo requiere encontrar un elemento.
-
-```cpp
-int encontrarMinSort(vector<int> arr) {
-    sort(arr.begin(), arr.end());
-    return arr[0];
-}
-```
-
-Esta solución ilustra el principio central de la práctica: una mejora en la elección del algoritmo tiene más impacto que cualquier microoptimización. El sort hace trabajo completamente innecesario.
-
-### Solución 3 — Búsqueda binaria `encontrarMin` — O(log n) Solución principal
-
-Aprovecha la propiedad estructural del arreglo rotado: en cada paso compara `arr[medio]` con `arr[high]` para determinar en cuál mitad se encuentra el punto de quiebre y descarta la otra mitad. Cada iteración reduce el rango a la mitad.
-
-```cpp
-int encontrarMin(int arr[], int n) {
-    int low = 0, high = n - 1;
-    while (low < high) {
-        int medio = (low + high) / 2;
-        if (arr[medio] > arr[high])
-            low = medio + 1;
-        else
-            high = medio;
-    }
-    return low;
-}
-```
 
 ### Tabla comparativa
 
@@ -406,12 +520,4 @@ Para n = 1,000,000, comparando las dos estrategias de mejora:
 La elección del algoritmo correcto (búsqueda binaria vs lineal) tiene un impacto de **cuatro órdenes de magnitud** más que la mejor optimización del compilador. Cambiar de `-O0` a `-O3` mejora ~3×; cambiar de búsqueda lineal a búsqueda binaria mejora ~20,000×. Esta diferencia solo se amplifica conforme n crece.
  
 ---
- 
-
- 
-Grupo 10
-Angel Jesus Navarro Ruiz
-Cristhyan Perez Villegas
- 
-
 
