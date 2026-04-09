@@ -56,7 +56,7 @@ En este problema el costo del algoritmo está relacionado con la representación
 
 6. En `demo_adt_secuencia.cpp`, expliquen por qué la misma interfaz puede convivir con representaciones distintas.
 
-En demo_adt_secuencia.cpp, la misma interfaz puede convivir con representaciones distintas porque el ADT define qué operaciones ofrece una secuencia, pero no obliga a que esas operaciones se implementen de una sola manera. La interfaz IntSequence especifica operaciones como size, get, set, add y remove, y cualquier clase que las implemente correctamente puede representar el mismo ADT.
+En demo_adt_secuencia.cpp, la misma interfaz puede convivir con representaciones distintas porque el ADT define qué operaciones ofrece una secuencia, pero no obliga a que esas operaciones se implementen de una sola manera. La interfaz "IntSequence" especifica operaciones como size, get, set, add y remove, y cualquier clase que las implemente correctamente puede representar el mismo ADT.
 
 Eso se ve en las clases FixedArraySequence y VectorSequence. Ambas representan una secuencia de enteros y permiten hacer las mismas operaciones desde el punto de vista del usuario, pero internamente usan estructuras diferentes. FixedArraySequence guarda los datos en un arreglo fijo con una capacidad máxima de 16 elementos y controla manualmente el número de elementos. En cambio, VectorSequence usa std::vector<int>, que maneja memoria dinámica y puede crecer automáticamente.
 
@@ -92,9 +92,12 @@ Luego respondan:
 La salida que sirve para defender costo y no solo resultado es la que imprime las estadísticas: comparaciones, intercambios, ultimo swap; porque esas cantidades muestran cuánto trabajo hizo realmente el algoritmo. Ver solo el arreglo final ordenado prueba el resultado, pero no dice nada sobre el esfuerzo que tomó llegar allí. 
 
 2. En `demo_power.cpp`, ¿qué comparación concreta muestra una mejora algorítmica?
-La comparación concreta es entre powerBF(3, 5) y power(3, 5) (y su equivalente para potencias de 2: power2BF vs power2). Ambas devuelven el mismo resultado (243), pero el camino es distinto.
-"powerBF" multiplica 3 por sí mismo 5 veces → 5 multiplicaciones (lineal en el exponente).
-Por otro lado, "power" descompone el exponente en bits: 5 = 101₂, así que solo necesita 3 operaciones (dos cuadrados y una multiplicación extra por el bit activo) → O(log n).
+
+La comparación concreta que muestra una mejora algorítmica es powerBF vs power (potencia por fuerza bruta vs potencia por exponenciación rápida).
+
+"powerBF" se multiplica "a" por sí mismo "n" veces en un bucle lineal, así que su complejidad es O(n). En cambio, power usa la técnica de exponenciación binaria (también llamada square-and-multiply): en cada iteración revisa el bit menos significativo de n, multiplica acumulando solo cuando ese bit es 1, y luego eleva al cuadrado la base mientras desplaza n a la derecha. Como el número de bits de n es log₂(n), la complejidad baja a O(log n).
+
+Por ejemplo, para calcular a^16, powerBF hace 16 multiplicaciones, mientras que power solo necesita alrededor de 4 (los 4 pasos de bits de 16 = 10000₂). A medida que n crece, la diferencia se vuelve enorme: para n = 1 000 000, son un millón de multiplicaciones contra aproximadamente 20.
 
 La mejora se vuelve visible cuando el exponente crece: para exp = 1000, powerBF haría 1000 multiplicaciones y power solo alrededor de 10.
 
@@ -109,7 +112,9 @@ Las tres funciones imprimen 55 para n = 10, pero solo fibI y fib(n, prev) escala
 
 4. En `demo_countones.cpp`, ¿qué ejemplo ayuda más a distinguir valor numérico de tamaño en bits?
 
-El ejemplo que mejor ayuda a distinguir valor numérico de tamaño en bits es precisamente x = 0b101101001. Su valor numérico es 361, pero lo que importa para countOnes1 no es ese número sino cuántos bits en 1 tiene: exactamente 5. countOnes1 hará 5 iteraciones — una por cada bit activo — sin importar que el tipo sea unsigned int de 32 bits. En cambio, countOnes2 siempre procesa los 32 bits del tipo completo en rondas fijas, independientemente de cuántos estén activos. El detalle que lo hace visible en el demo es que x se imprime con std::bitset<16>, mostrando 0000101101001 — una representación que deja claro que el "tamaño" del tipo (16 o 32 bits) y el "valor" (los bits activos) son dos cosas distintas, y que cada función responde a una de ellas.
+El ejemplo que mejor distingue valor numérico de tamaño en bits es "countOnes1". Su bucle ejecuta "n &= (n - 1)" que apaga el bit menos significativo en cada iteración, así que el número de iteraciones es igual a la cantidad de bits en 1, no al valor de n. Esto se ve claramente comparando dos casos, el número 128 (10000000₂) tiene valor grande pero solo 1 bit encendido, por lo que el bucle itera una sola vez. En cambio, 7 (111₂) tiene valor pequeño pero 3 bits encendidos, y el bucle itera tres veces. Así queda en evidencia que el costo depende del tamaño en bits (cuántos unos hay), no del valor numérico.
+
+La complejidad de 'countOnes1' es 'O(ones)', mientras que 'countOnes2', al usar rondas fijas de ROUND sobre el ancho de palabra de 32 bits, opera en 'O(log w)' constante, independiente tanto del valor como de los bits encendidos.
 
 #### Bloque 3 - Pruebas públicas y preparación de sustentación
 
